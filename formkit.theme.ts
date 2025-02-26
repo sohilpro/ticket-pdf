@@ -498,7 +498,7 @@ const classes: Record<string, Record<string, boolean>> = {
     "[&>svg]:w-full": true
   },
   "family:dropdown__option": {
-    "ml-[1.5em]": true
+    "ml-[1.5em]": false
   },
   "family:dropdown__loadMore": {
     "data-[is-active]:bg-blue-100": true

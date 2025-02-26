@@ -340,7 +340,8 @@
                 />
               </div>
                   <span  v-if="!showInputs.origin"
-                  @click="showInputs.origin = true">{{ data.origin }}</span> -   <div class="w-auto" v-if="showInputs.origin_airport">
+                  @click="showInputs.origin = true">{{ data.origin }}</span> -   
+                  <div class="w-auto" v-if="showInputs.origin_airport">
                 <FormKit
                   type="text"
                   @blur="showInputs.origin_airport = false"
@@ -349,12 +350,14 @@
                   name="origin_airport"
                   input-class="text-sm"
                 />
-              </div> <span v-if="!showInputs.origin_airport"
+              </div> 
+              <span v-if="!showInputs.origin_airport"
                   @click="showInputs.origin_airport = true">
                     {{ data.origin_airport }}
                   </span>
                 </p>
               </div>
+              
               <div
                 class="flex flex-col text-gray-500 items-center justify-center"
               >
@@ -372,6 +375,7 @@
 
                 <span class="text-sm"> nonstop </span>
               </div>
+
               <div class="flex flex-col">
                 <div class="flex items-center gap-2">
                   <div class="w-[40%]" v-if="showInputs.destination_date">
@@ -445,8 +449,43 @@
 
             <div class="flex items-center text-sm justify-between">
               <div class="flex items-center gap-2">
-                <span> 
-                  <div class="w-auto" v-if="showInputs.origin_air">
+                <div class="w-60" v-if="showInputs.airline_logo">
+                  <FormKit
+                    type="dropdown"
+                    name="airline_logo"
+                    @blur="showInputs.airline_logo = false"
+                    :value="airlines[0].value"
+                    placeholder="select logo"
+                    :options="airlines"
+                    v-model="data.airline_logo"
+                  >
+                    <template #option="{ option, classes }">
+                      <div :class="`${classes.option} flex items-center`">
+                        <img
+                          :src="option.value"
+                          alt="optionAvatar"
+                          class="w-10 mr-1 rounded-full"
+                        />
+                        <span class="ml-2">
+                          {{ option.label }}
+                        </span>
+                      </div>
+                    </template>
+                  </FormKit>
+                </div>
+
+                <div
+                  v-if="!showInputs.airline_logo"
+                  @click="showInputs.airline_logo = true"
+                  class="w-10 h-10 border rounded-full"
+                >
+                  <img :src="data.airline_logo" alt="logo" />
+                </div>
+
+                <span v-if="!showInputs.airline_logo"
+                >
+                  {{ data.air_name }}
+                  <!-- <div class="w-auto" v-if="showInputs.origin_air">
                 <FormKit
                   type="text"
                   @blur="showInputs.origin_air = false"
@@ -458,9 +497,9 @@
               </div> <span v-if="!showInputs.origin_air"
                   @click="showInputs.origin_air = true">
                     {{ data.origin_air }}
-                  </span>
-                  - 
-                  <div class="w-auto" v-if="showInputs.destination_air">
+                  </span> -->
+                  <!-- -  -->
+                  <!-- <div class="w-auto" v-if="showInputs.destination_air">
                 <FormKit
                   type="text"
                   @blur="showInputs.destination_air = false"
@@ -469,10 +508,11 @@
                   name="destination_air"
                   input-class="text-sm"
                 />
-              </div> <span v-if="!showInputs.destination_air"
+              </div> 
+              <span v-if="!showInputs.destination_air"
                   @click="showInputs.destination_air = true">
                     {{ data.destination_air }}
-                  </span>
+                  </span> -->
                 </span>
               </div>
 
@@ -558,6 +598,8 @@
 </template>
 
 <script setup>
+const { airlines } = await import("~/assets/json/airlines.json");
+
 const loading = ref(false);
 const basePdf = ref(null);
 
@@ -582,6 +624,7 @@ const showInputs = reactive({
   destination_airport: false,
   origin_air: false,
   destination_air: false,
+  airline_logo: false,
 });
 const data = reactive({
   birth_date: "Feb 28 2019",
@@ -604,10 +647,21 @@ const data = reactive({
   destination_airport: "Imam Khomeini",
   destination_air: "IMK Air",
   origin_air: "IMK Air",
-  country: 'Iran',
+  country: "Iran",
+  airline_logo: airlines[0].value,
+  air_name: airlines[0].label,
 });
 
-watch(data, () => (showInputs.gender = false));
+const findAirName = () => {
+  const air_name = airlines.find((i) => i.value == data.airline_logo);
+  data.air_name = air_name.label;
+};
+
+watch(data, () => {
+  showInputs.gender = false;
+  showInputs.airline_logo = false;
+  findAirName();
+});
 
 const download = async () => {
   loading.value = true;
@@ -621,7 +675,7 @@ const download = async () => {
 
     basePdf.value = dataResponse;
 
-    downloadPdf()
+    downloadPdf();
   } catch (error) {
     console.error("Error render PDF:", error.message);
   } finally {
@@ -639,3 +693,9 @@ const downloadPdf = () => {
   downloadLink.click();
 };
 </script>
+
+<style scoped>
+:deep(.formkit-dropdownWrapper){
+  @apply !max-h-[200px]
+}
+</style>
