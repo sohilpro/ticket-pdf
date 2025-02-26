@@ -477,7 +477,7 @@
                 <div
                   v-if="!showInputs.airline_logo"
                   @click="showInputs.airline_logo = true"
-                  class="w-10 h-10 border rounded-full"
+                  class="w-10 h-10 border rounded-full cursor-pointer"
                 >
                   <img :src="data.airline_logo" alt="logo" />
                 </div>
