@@ -36,7 +36,9 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="bg-wite flex gap-3 flex-col">
-        <div class="flex bg-blue-500 text-white rounded-xl px-5 py-4">
+        <div
+          class="flex items-center justify-between bg-blue-500 text-white rounded-xl px-5 py-4"
+        >
           <div class="flex flex-col gap-2 text-xl">
             <p>if You Want to Go Far, Go Together</p>
 
@@ -54,6 +56,20 @@
               </svg>
               <span> +964 708 814 3063 </span>
             </div>
+          </div>
+          <div>
+            <FormKit
+              type="togglebuttons"
+              name="shirt_size"
+              label="Show logo airline"
+              label-class="text-white"
+              :options="[
+                { label: 'Show', value: true },
+                { label: 'Hide', value: false },
+              ]"
+              :value="data.show_logo"
+              v-model="data.show_logo"
+            />
           </div>
         </div>
 
@@ -178,9 +194,25 @@
               </span>
             </div>
             <div class="flex justify-between">
-              <span> PIS: </span>
+              <span> PNR: </span>
 
-              <span class="font-semibold"> mmm </span>
+              <div class="w-[40%]" v-if="showInputs.country">
+                <FormKit
+                  type="text"
+                  @blur="showInputs.country = false"
+                  @keydown.enter="showInputs.country = false"
+                  v-model="data.country"
+                  name="country"
+                />
+              </div>
+
+              <span
+                v-if="!showInputs.country"
+                @click="showInputs.country = true"
+                class="font-semibold"
+              >
+                {{ data.country }}
+              </span>
             </div>
             <div class="flex justify-between">
               <span> First Name: </span>
@@ -222,6 +254,7 @@
                 {{ data.last_name }}
               </span>
             </div>
+
             <div class="flex justify-between">
               <span> Passport Number: </span>
               <div class="w-[40%]" v-if="showInputs.passport_number">
@@ -243,6 +276,32 @@
               >
                 {{ data.passport_number }}
               </span>
+            </div>
+
+            <div class="flex items-end justify-between">
+              <div>
+                <FormKit
+                  type="togglebuttons"
+                  label="Show Price"
+                  label-class="!text-gray-500"
+                  :options="[
+                    { label: 'Show', value: true },
+                    { label: 'Hide', value: false },
+                  ]"
+                  :value="data.price.show"
+                  v-model="data.price.show"
+                />
+              </div>
+              <div class="w-1/4">
+                <FormKit
+                  v-if="data.price.show"
+                  v-model="data.price.value"
+                  type="currency"
+                  currency="USD"
+                  display-locale="en"
+                  value="12300"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -282,7 +341,23 @@
                 </span>
               </div>
 
-              <span> economy </span>
+              <div class="w-1/5" v-if="showInputs.air_class">
+                <FormKit
+                  type="text"
+                  @blur="showInputs.air_class = false"
+                  @keydown.enter="showInputs.air_class = false"
+                  v-model="data.air_class"
+                  name="air_class"
+                  input-class="bg-red-500 text-center"
+                />
+              </div>
+
+              <span
+                v-if="!showInputs.air_class"
+                @click="showInputs.air_class = true"
+              >
+                {{ data.air_class }}
+              </span>
             </div>
 
             <div class="flex justify-between">
@@ -451,19 +526,23 @@
               <div class="flex items-center gap-2">
                 <div class="w-60" v-if="showInputs.airline_logo">
                   <FormKit
-                    type="dropdown"
+                    type="autocomplete"
                     name="airline_logo"
                     @blur="showInputs.airline_logo = false"
                     :value="airlines[0].value"
                     placeholder="select logo"
                     :options="airlines"
+                    selection-appearance="option"
+                    @change="() => console.log('ssd')"
+                    open-on-click
+                    clear-search-on-open
                     v-model="data.airline_logo"
                   >
                     <template #option="{ option, classes }">
                       <div :class="`${classes.option} flex items-center`">
                         <img
                           :src="option.value"
-                          alt="optionAvatar"
+                          :alt="option.label + ' logo'"
                           class="w-10 mr-1 rounded-full"
                         />
                         <span class="ml-2">
@@ -475,15 +554,18 @@
                 </div>
 
                 <div
-                  v-if="!showInputs.airline_logo"
+                  v-if="!showInputs.airline_logo && data.show_logo"
                   @click="showInputs.airline_logo = true"
                   class="w-10 h-10 border rounded-full cursor-pointer"
                 >
-                  <img :src="data.airline_logo" alt="logo" />
+                  <img
+                    :src="data.airline_logo"
+                    alt="logo"
+                    class="w-10 mr-1 rounded-full"
+                  />
                 </div>
 
-                <span v-if="!showInputs.airline_logo"
-                >
+                <span v-if="!showInputs.airline_logo && data.show_logo">
                   {{ data.air_name }}
                   <!-- <div class="w-auto" v-if="showInputs.origin_air">
                 <FormKit
@@ -517,7 +599,26 @@
               </div>
 
               <div class="flex items-center gap-2">
-                <span>Two packages (20 kg each)</span>
+                <span
+                  >Two packages (
+                  <span class="w-[40%]" v-if="showInputs.packages">
+                    <FormKit
+                      type="number"
+                      number="integer"
+                      @blur="showInputs.packages = false"
+                      @keydown.enter="showInputs.packages = false"
+                      v-model="data.packages"
+                      name="packages"
+                      max="20"
+                    />
+                  </span>
+                  <span
+                    v-if="!showInputs.packages"
+                    @click="showInputs.packages = true"
+                    >{{ data.packages }}</span
+                  >
+                  kg each)</span
+                >
                 <svg
                   width="20"
                   height="20"
@@ -609,7 +710,6 @@ const showInputs = reactive({
   expire_date_passport: false,
   nationality: false,
   gender: false,
-  pis: false,
   first_name: false,
   last_name: false,
   passport_number: false,
@@ -625,6 +725,8 @@ const showInputs = reactive({
   origin_air: false,
   destination_air: false,
   airline_logo: false,
+  air_class: false,
+  packages: false,
 });
 const data = reactive({
   birth_date: "Feb 28 2019",
@@ -632,7 +734,6 @@ const data = reactive({
   expire_date_passport: "Feb 28 2019",
   nationality: "iran",
   gender: "male",
-  pis: 2020,
   first_name: "sample_name",
   last_name: "sample_last",
   passport_number: 35795145,
@@ -650,6 +751,10 @@ const data = reactive({
   country: "Iran",
   airline_logo: airlines[0].value,
   air_name: airlines[0].label,
+  air_class: "economy",
+  show_logo: true,
+  packages: 20,
+  price: { value: 12300, show: true },
 });
 
 const findAirName = () => {
@@ -695,7 +800,7 @@ const downloadPdf = () => {
 </script>
 
 <style scoped>
-:deep(.formkit-dropdownWrapper){
-  @apply !max-h-[200px]
+:deep(.formkit-dropdownWrapper) {
+  @apply !max-h-[200px];
 }
 </style>
